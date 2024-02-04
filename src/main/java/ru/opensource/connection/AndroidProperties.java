@@ -1,4 +1,4 @@
-package ru.opensource.connction;
+package ru.opensource.connection;
 
 public class AndroidProperties {
 

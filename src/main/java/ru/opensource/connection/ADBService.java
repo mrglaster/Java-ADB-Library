@@ -1,4 +1,4 @@
-package ru.opensource.connction;
+package ru.opensource.connection;
 import lombok.Getter;
 import ru.opensource.exception.ADBIncorrectPathException;
 import ru.opensource.exception.ADBNotFoundException;

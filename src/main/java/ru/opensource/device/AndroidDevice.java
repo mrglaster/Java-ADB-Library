@@ -3,11 +3,11 @@ import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import ru.opensource.application.AndroidApp;
 import ru.opensource.calc.HashCalc;
-import ru.opensource.connction.ADBService;
-import static ru.opensource.connction.AndroidProperties.ANDROID_API_LEVEL;
-import static ru.opensource.connction.AndroidProperties.ANDROID_PRODUCT_BRAND;
-import static ru.opensource.connction.AndroidProperties.ANDROID_PRODUCT_DEVICE;
-import static ru.opensource.connction.AndroidProperties.ANDROID_VERSION;
+import ru.opensource.connection.ADBService;
+import static ru.opensource.connection.AndroidProperties.ANDROID_API_LEVEL;
+import static ru.opensource.connection.AndroidProperties.ANDROID_PRODUCT_BRAND;
+import static ru.opensource.connection.AndroidProperties.ANDROID_PRODUCT_DEVICE;
+import static ru.opensource.connection.AndroidProperties.ANDROID_VERSION;
 import ru.opensource.exception.ADBShellExecutionException;
 import ru.opensource.exception.AndroidDeviceNotAvailableException;
 

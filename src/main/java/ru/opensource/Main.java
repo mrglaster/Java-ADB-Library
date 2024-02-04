@@ -1,7 +1,6 @@
 package ru.opensource;
 
-import ru.opensource.connction.ADBService;
-import static ru.opensource.connction.AndroidProperties.*;
+import ru.opensource.connection.ADBService;
 import ru.opensource.device.AndroidDevice;
 import ru.opensource.exception.ADBNotFoundException;
 import ru.opensource.exception.ADBShellExecutionException;
