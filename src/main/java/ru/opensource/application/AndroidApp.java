@@ -10,6 +10,19 @@ public class AndroidApp {
     private String sha1;
     private String sha256;
     private String sha512;
-    private ArrayList<String> runtimePermissions = new ArrayList<>();
-    private ArrayList<String> installPermissions = new ArrayList<>();
+    private ArrayList<ApplicationPermission> runtimePermissions = new ArrayList<>();
+    private ArrayList<ApplicationPermission> installPermissions = new ArrayList<>();
+    private ArrayList<ApplicationPermission> requestedPermissions = new ArrayList<>();
+
+    public void addRuntimePermission(ApplicationPermission permission){
+        this.runtimePermissions.add(permission);
+    }
+
+    public void addInstallPermissions(ApplicationPermission permission){
+        this.installPermissions.add(permission);
+    }
+
+    public void addRequestedPermissions(ApplicationPermission permission){
+        this.requestedPermissions.add(permission);
+    }
 }
