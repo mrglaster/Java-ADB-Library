@@ -3,7 +3,7 @@ import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import ru.opensource.connection.ADBService;
 import ru.opensource.connection.AndroidProperties;
-import ru.opensource.exception.ADBShellExecutionException;
+import ru.opensource.exceptions.ADBShellExecutionException;
 import java.io.IOException;
 import java.util.List;
 

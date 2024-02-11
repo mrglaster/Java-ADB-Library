@@ -1,4 +1,4 @@
-package ru.opensource.exception;
+package ru.opensource.exceptions;
 
 public class ADBPermissionCollectingException extends Exception{
     public ADBPermissionCollectingException(String errorMessage){

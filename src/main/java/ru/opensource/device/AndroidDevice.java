@@ -6,9 +6,9 @@ import ru.opensource.application.AndroidApp;
 import ru.opensource.application.ApplicationPermission;
 import ru.opensource.calc.HashCalc;
 import ru.opensource.connection.ADBService;
-import ru.opensource.exception.ADBPermissionCollectingException;
-import ru.opensource.exception.ADBShellExecutionException;
-import ru.opensource.exception.AndroidDeviceNotAvailableException;
+import ru.opensource.exceptions.ADBPermissionCollectingException;
+import ru.opensource.exceptions.ADBShellExecutionException;
+import ru.opensource.exceptions.AndroidDeviceNotAvailableException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         if (versionNumeric <= 6.0){
             String command = super.getAdbService().getCommandBaseNoShell(super.getDeviceId()) +   "pull " + applicationPath + ' ' + tempApkName;
             super.getAdbService().getAdbServiceLogger().info("Grabbing apk file using command: " + command);
-            ArrayList<String> none = super.getAdbService().getPoh().getProcessOutput(Runtime.getRuntime().exec(command));
+            super.getAdbService().getPoh().getProcessOutput(Runtime.getRuntime().exec(command));
             sha256 = HashCalc.calculateSha256Hash(tempApkName);
             sha512= HashCalc.calculateSha512Hash(tempApkName);
             if (sha1.length() == 0 ){
@@ -143,12 +143,8 @@ public class AndroidDevice extends AndroidDeviceInfo {
                             currentPermission.setGranted(true);
                             application.addRequestedPermissions(currentPermission);
                         }
-                        case 2 -> {
-                            application.addInstallPermissions(currentPermission);
-                        }
-                        case 3 -> {
-                            application.addRuntimePermission(currentPermission);
-                        }
+                        case 2 -> application.addInstallPermissions(currentPermission);
+                        case 3 -> application.addRuntimePermission(currentPermission);
                     }
                 }
             }

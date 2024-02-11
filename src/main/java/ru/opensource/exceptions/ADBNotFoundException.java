@@ -1,4 +1,4 @@
-package ru.opensource.exception;
+package ru.opensource.exceptions;
 
 public class ADBNotFoundException extends Exception{
     public ADBNotFoundException(String errorMessage){

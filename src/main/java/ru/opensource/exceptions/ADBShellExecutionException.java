@@ -1,4 +1,4 @@
-package ru.opensource.exception;
+package ru.opensource.exceptions;
 
 public class ADBShellExecutionException extends Exception{
     public ADBShellExecutionException(String errorMessage){

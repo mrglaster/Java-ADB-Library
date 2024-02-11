@@ -1,4 +1,4 @@
-package ru.opensource.exception;
+package ru.opensource.exceptions;
 
 public class AndroidDeviceNotAvailableException extends Exception{
 

@@ -1,7 +1,7 @@
 package ru.opensource.connection;
 import lombok.Getter;
-import ru.opensource.exception.ADBIncorrectPathException;
-import ru.opensource.exception.ADBNotFoundException;
+import ru.opensource.exceptions.ADBIncorrectPathException;
+import ru.opensource.exceptions.ADBNotFoundException;
 import ru.opensource.processes.ProcessOutputHandler;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class ADBService {
             }
             return result;
         } catch (IOException e) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
     }
     public String getCommandBase(String deviceId){
