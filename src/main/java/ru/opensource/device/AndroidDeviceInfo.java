@@ -2,7 +2,7 @@ package ru.opensource.device;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import ru.opensource.connection.ADBService;
-import ru.opensource.connection.AndroidProperties;
+import ru.opensource.connection.AndroidDeviceProperties;
 import ru.opensource.exceptions.ADBShellExecutionException;
 import java.io.IOException;
 import java.util.List;
@@ -29,10 +29,10 @@ public class AndroidDeviceInfo {
 
     private void initializeProperties() {
         try {
-            this.androidVersion = getRawPropertyValue(AndroidProperties.ANDROID_VERSION);
-            this.androidSDKVersion = getRawPropertyValue(AndroidProperties.ANDROID_API_LEVEL);
-            this.brand = getRawPropertyValue(AndroidProperties.ANDROID_PRODUCT_BRAND);
-            this.model = getRawPropertyValue(AndroidProperties.ANDROID_PRODUCT_DEVICE);
+            this.androidVersion = getRawPropertyValue(AndroidDeviceProperties.ANDROID_VERSION);
+            this.androidSDKVersion = getRawPropertyValue(AndroidDeviceProperties.ANDROID_API_LEVEL);
+            this.brand = getRawPropertyValue(AndroidDeviceProperties.ANDROID_PRODUCT_BRAND);
+            this.model = getRawPropertyValue(AndroidDeviceProperties.ANDROID_PRODUCT_DEVICE);
         } catch (ADBShellExecutionException e) {
             handleShellExecutionException(e);
         }

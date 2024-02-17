@@ -1,6 +1,6 @@
 package ru.opensource.connection;
 
-public class AndroidProperties {
+public class AndroidDeviceProperties {
 
     public static final String ANDROID_VERSION = "ro.build.version.release";
     public static final String ANDROID_DEVICE_MODEL = "ro.product.model";
