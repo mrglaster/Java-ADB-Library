@@ -1,9 +1,9 @@
-package ru.opensource.device;
+package ru.opensource.adblibrary.device;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
-import ru.opensource.connection.ADBService;
-import ru.opensource.properties.AndroidDeviceProperties;
-import ru.opensource.exceptions.ADBShellExecutionException;
+import ru.opensource.adblibrary.connection.ADBService;
+import ru.opensource.adblibrary.properties.AndroidDeviceProperties;
+import ru.opensource.adblibrary.exceptions.ADBShellExecutionException;
 import java.io.IOException;
 import java.util.List;
 
@@ -55,7 +55,7 @@ public class AndroidDeviceInfo {
             Process process = processBuilder.start();
             StringBuilder output = new StringBuilder();
             try{
-                List<String> result = adbService.getPoh().getProcessOutput(process);
+                List<String> result = adbService.getProcessOutputHandler().getProcessOutput(process);
                 if (!result.isEmpty()) {
                     for (String line : result) {
                         output.append(line).append('\n');

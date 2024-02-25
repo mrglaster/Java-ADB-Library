@@ -1,4 +1,4 @@
-package ru.opensource.calc;
+package ru.opensource.adblibrary.calc;
 
 import java.io.IOException;
 import java.math.BigInteger;

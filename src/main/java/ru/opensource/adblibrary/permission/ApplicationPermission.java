@@ -1,4 +1,4 @@
-package ru.opensource.application;
+package ru.opensource.adblibrary.permission;
 
 import lombok.Data;
 

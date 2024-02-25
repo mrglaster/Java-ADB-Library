@@ -1,15 +1,17 @@
-package ru.opensource.device;
+package ru.opensource.adblibrary.device;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-import ru.opensource.application.AndroidApp;
-import ru.opensource.application.ApplicationPermission;
-import ru.opensource.calc.HashCalc;
-import ru.opensource.connection.ADBService;
-import ru.opensource.exceptions.ADBPermissionCollectingException;
-import ru.opensource.exceptions.ADBShellExecutionException;
-import ru.opensource.exceptions.AndroidDeviceNotAvailableException;
-import ru.opensource.exceptions.InvalidPackageNameException;
+import ru.opensource.adblibrary.application.AndroidApplication;
+import ru.opensource.adblibrary.exceptions.ADBException;
+import ru.opensource.adblibrary.permission.ApplicationPermission;
+import ru.opensource.adblibrary.calc.HashCalc;
+import ru.opensource.adblibrary.connection.ADBService;
+import ru.opensource.adblibrary.exceptions.ADBPermissionCollectingException;
+import ru.opensource.adblibrary.exceptions.ADBShellExecutionException;
+import ru.opensource.adblibrary.exceptions.AndroidDeviceNotAvailableException;
+import ru.opensource.adblibrary.exceptions.InvalidPackageNameException;
+import ru.opensource.adblibrary.permission.ApplicationPermissionProvider;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -19,9 +21,16 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     private final float versionNumeric;
 
+    private final ApplicationPermissionProvider applicationPermissionProvider = new ApplicationPermissionProvider();
+
+    private final short GRANT_PERMISSION_SHELL_ONLY = 0;
+    private final short GRANT_PERMISSION_APP_UPDATE = 1;
+
+
+
     @Getter
     @Setter
-    private ArrayList<AndroidApp> applications;
+    private ArrayList<AndroidApplication> applications;
 
 
     private static final int COLLECT_REQUESTED_PERMISSIONS = 1;
@@ -29,7 +38,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
     private static final int COLLECT_RUNTIME_PERMISSIONS = 3;
     private final int restriction;
 
-    public AndroidDevice(@NotNull String deviceId, ADBService adbService) throws AndroidDeviceNotAvailableException, ADBShellExecutionException, IOException, NoSuchAlgorithmException, ADBPermissionCollectingException {
+    public AndroidDevice(@NotNull String deviceId, ADBService adbService) throws ADBException, IOException, NoSuchAlgorithmException{
         super(deviceId, adbService);
         if (!adbService.getAvailableDevices().contains(deviceId)){
             throw new AndroidDeviceNotAvailableException("Android device " + deviceId + "is not available!");
@@ -41,7 +50,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         collectApplicationProperties();
     }
 
-    public AndroidDevice(@NotNull String deviceId, ADBService adbService, int appsListRestriction) throws AndroidDeviceNotAvailableException, ADBPermissionCollectingException, IOException, NoSuchAlgorithmException, ADBShellExecutionException {
+    public AndroidDevice(@NotNull String deviceId, ADBService adbService, int appsListRestriction) throws ADBException, IOException, NoSuchAlgorithmException {
         super(deviceId, adbService);
         if (!adbService.getAvailableDevices().contains(deviceId)){
             throw new AndroidDeviceNotAvailableException("Android device " + deviceId + "is not available!");
@@ -58,12 +67,12 @@ public class AndroidDevice extends AndroidDeviceInfo {
         getAdbService().logInfo("Getting applications list with command: " + command);
         try {
             Process process = Runtime.getRuntime().exec(command);
-            ArrayList<String> result = super.getAdbService().getPoh().getProcessOutput(process);
+            ArrayList<String> result = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
             for (var application : result){
                 String currentApp = application;
                 currentApp = currentApp.replace("package:/", "/");
                 String[] params = currentApp.split("=");
-                AndroidApp app = new AndroidApp();
+                AndroidApplication app = new AndroidApplication();
                 app.setPath(params[0]);
                 app.setPackageName(params[1]);
                 this.applications.add(app);
@@ -73,7 +82,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         }
     }
 
-    private void collectApplicationProperties() throws IOException, NoSuchAlgorithmException, ADBPermissionCollectingException {
+    private void collectApplicationProperties() throws IOException, NoSuchAlgorithmException, ADBException {
         int res = 0;
         for (var application : this.applications){
             collectApplicationPermissions(application);
@@ -104,7 +113,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         if (versionNumeric <= 6.0){
             String command = super.getAdbService().getCommandBaseNoShell(super.getDeviceId()) +   "pull " + applicationPath + ' ' + tempApkName;
             getAdbService().logInfo("Grabbing apk file using command: " + command);
-            getAdbService().getPoh().getProcessOutput(Runtime.getRuntime().exec(command));
+            getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(command));
             sha256 = HashCalc.calculateSha256Hash(tempApkName);
             sha512= HashCalc.calculateSha512Hash(tempApkName);
             if (sha1.length() == 0 ){
@@ -126,13 +135,13 @@ public class AndroidDevice extends AndroidDeviceInfo {
     }
 
     private String collectApplicationHashAuto(String hashFunction, String applicationPath) throws IOException {
-       return getAdbService().getPoh().getProcessOutput(Runtime.getRuntime().exec(super.getAdbService().getCommandBase(super.getDeviceId()) + ' ' + hashFunction + ' ' + applicationPath)).get(0).split(" ")[0];
+       return getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(super.getAdbService().getCommandBase(super.getDeviceId()) + ' ' + hashFunction + ' ' + applicationPath)).get(0).split(" ")[0];
     }
 
-    private void collectApplicationPermissions(AndroidApp application) throws ADBPermissionCollectingException {
+    private void collectApplicationPermissions(AndroidApplication application) throws ADBPermissionCollectingException {
         String command = super.getAdbService().getCommandBase(this.getDeviceId()) + " dumpsys package " + application.getPackageName();
         try {
-            ArrayList<String> collectedStrings = super.getAdbService().getPoh().getProcessOutput(Runtime.getRuntime().exec(command));
+            ArrayList<String> collectedStrings = super.getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(command));
             int currentState = 0;
             for (var row : collectedStrings){
                 if (row.contains("requested permissions")){
@@ -167,8 +176,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     }
 
-
-    public void uninstallApp(String packageName) throws InvalidPackageNameException, ADBShellExecutionException {
+    public void uninstallApp(String packageName) throws InvalidPackageNameException, ADBException {
         if (!packageName.contains(".")){
             throw new InvalidPackageNameException("Invalid package name: " + packageName);
         }
@@ -176,7 +184,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         getAdbService().logInfo("Uninstalling App: " + packageName);
         try {
             Process process = Runtime.getRuntime().exec(command);
-            super.getAdbService().getPoh().getProcessOutput(process);
+            super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
             for (int i = 0; i < applications.size() ; i++) {
                 if (applications.get(i).getPackageName().equals(packageName)){
                     applications.remove(i);

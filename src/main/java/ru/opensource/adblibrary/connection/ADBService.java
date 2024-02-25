@@ -1,8 +1,8 @@
-package ru.opensource.connection;
+package ru.opensource.adblibrary.connection;
 import lombok.Getter;
-import ru.opensource.exceptions.ADBIncorrectPathException;
-import ru.opensource.exceptions.ADBNotFoundException;
-import ru.opensource.processes.ProcessOutputHandler;
+import ru.opensource.adblibrary.exceptions.ADBIncorrectPathException;
+import ru.opensource.adblibrary.exceptions.ADBNotFoundException;
+import ru.opensource.adblibrary.processes.ProcessOutputHandler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -16,7 +16,7 @@ public class ADBService {
     private final Logger adbServiceLogger = Logger.getLogger("ADBServiceLogger");
 
     @Getter
-    private final ProcessOutputHandler poh;
+    private final ProcessOutputHandler processOutputHandler;
 
     public ADBService() throws ADBNotFoundException {
         if (!isAdbInstalled()){
@@ -25,7 +25,7 @@ public class ADBService {
         }
         adbServiceLogger.info("ADB is installed on this machine");
         this.adbPath = "adb";
-        this.poh = new ProcessOutputHandler();
+        this.processOutputHandler = new ProcessOutputHandler();
     }
 
 
@@ -35,7 +35,7 @@ public class ADBService {
         }
         adbServiceLogger.fine("ADB the user provided is valid");
         this.adbPath = adbPath;
-        this.poh = new ProcessOutputHandler();
+        this.processOutputHandler = new ProcessOutputHandler();
     }
 
     private boolean isAdbInstalled(){
@@ -64,7 +64,7 @@ public class ADBService {
         try {
             String command = adbPath + " devices";
             Process process = Runtime.getRuntime().exec(command);
-            ArrayList<String> processOutput = poh.getProcessOutput(process);
+            ArrayList<String> processOutput = processOutputHandler.getProcessOutput(process);
             ArrayList<String> result = new ArrayList<>();
             for (var i : processOutput){
                 if (!i.startsWith("*") && !i.startsWith("List") && !(i.replaceAll("\\s+","").length() == 0)){

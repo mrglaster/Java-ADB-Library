@@ -1,4 +1,4 @@
-package ru.opensource.properties;
+package ru.opensource.adblibrary.properties;
 
 public class AndroidDeviceProperties {
 

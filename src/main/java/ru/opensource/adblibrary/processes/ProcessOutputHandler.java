@@ -1,4 +1,4 @@
-package ru.opensource.processes;
+package ru.opensource.adblibrary.processes;
 
 import java.io.BufferedReader;
 import java.io.IOException;
