@@ -1,4 +1,4 @@
-package ru.opensource.connection;
+package ru.opensource.properties;
 
 public class AndroidAppPermissions {
     public static final String PERMISSION_C2D_MESSAGE = "android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE";

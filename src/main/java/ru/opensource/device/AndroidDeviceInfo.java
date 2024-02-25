@@ -2,7 +2,7 @@ package ru.opensource.device;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import ru.opensource.connection.ADBService;
-import ru.opensource.connection.AndroidDeviceProperties;
+import ru.opensource.properties.AndroidDeviceProperties;
 import ru.opensource.exceptions.ADBShellExecutionException;
 import java.io.IOException;
 import java.util.List;
@@ -49,7 +49,7 @@ public class AndroidDeviceInfo {
     public String getRawPropertyValue(String property) throws ADBShellExecutionException {
         String command = String.format("%s -s %s shell %s%s",
                 adbService.getAdbPath(), deviceId, property.contains(" ") ? "" : "getprop ", property);
-        adbService.getAdbServiceLogger().info("Executing command: " + command);
+        adbService.logInfo("Executing command: " + command);
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command.split("\\s+"));
             Process process = processBuilder.start();

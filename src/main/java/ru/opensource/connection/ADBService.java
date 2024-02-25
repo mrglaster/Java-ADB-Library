@@ -2,7 +2,6 @@ package ru.opensource.connection;
 import lombok.Getter;
 import ru.opensource.exceptions.ADBIncorrectPathException;
 import ru.opensource.exceptions.ADBNotFoundException;
-import ru.opensource.logger.ADBServiceLogger;
 import ru.opensource.processes.ProcessOutputHandler;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ public class ADBService {
     private final String adbPath;
 
     @Getter
-    private final ADBServiceLogger adbServiceLogger = new ADBServiceLogger("ADB Service Logger", ADBService.class.getName());
+    private final Logger adbServiceLogger = Logger.getLogger("ADBServiceLogger");
 
     @Getter
     private final ProcessOutputHandler poh;
@@ -74,8 +73,12 @@ public class ADBService {
                     result.add(processedResult);
                 }
             }
+            if (result.size() == 0){
+                adbServiceLogger.warning("No available devices found!");
+            }
             return result;
         } catch (IOException e) {
+            adbServiceLogger.warning("No available devices found!");
             return new ArrayList<>();
         }
     }
