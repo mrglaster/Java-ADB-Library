@@ -23,11 +23,6 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     private final ApplicationPermissionProvider applicationPermissionProvider = new ApplicationPermissionProvider();
 
-    private final short GRANT_PERMISSION_SHELL_ONLY = 0;
-    private final short GRANT_PERMISSION_APP_UPDATE = 1;
-
-
-
     @Getter
     @Setter
     private ArrayList<AndroidApplication> applications;
@@ -160,12 +155,15 @@ public class AndroidDevice extends AndroidDeviceInfo {
                     ApplicationPermission currentPermission = new ApplicationPermission();
                     currentPermission.setGranted(currentRow.contains("true"));
                     currentPermission.setPermissionName(currentRow.split(":")[0]);
+                    if (currentPermission.isDangerous()){
+                        application.addDangerousPermission(currentPermission);
+                    }
                     switch (currentState) {
                         case 1 -> {
                             currentPermission.setGranted(true);
-                            application.addRequestedPermissions(currentPermission);
+                            application.addRequestedPermission(currentPermission);
                         }
-                        case 2 -> application.addInstallPermissions(currentPermission);
+                        case 2 -> application.addInstallPermission(currentPermission);
                         case 3 -> application.addRuntimePermission(currentPermission);
                     }
                 }

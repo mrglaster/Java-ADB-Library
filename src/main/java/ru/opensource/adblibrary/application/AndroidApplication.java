@@ -22,11 +22,13 @@ public class AndroidApplication {
         this.runtimePermissions.add(permission);
     }
 
-    public void addInstallPermissions(ApplicationPermission permission){
+    public void addInstallPermission(ApplicationPermission permission){
         this.installPermissions.add(permission);
     }
 
-    public void addRequestedPermissions(ApplicationPermission permission){
+    public void addRequestedPermission(ApplicationPermission permission){
         this.requestedPermissions.add(permission);
     }
+
+    public void addDangerousPermission(ApplicationPermission permission){this.dangerousPermissions.add(permission);}
 }

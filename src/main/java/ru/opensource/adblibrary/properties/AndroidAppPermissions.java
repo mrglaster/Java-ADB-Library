@@ -1,5 +1,9 @@
 package ru.opensource.adblibrary.properties;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class AndroidAppPermissions {
     public static final String PERMISSION_C2D_MESSAGE = "android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE";
     public static final String PERMISSION_ACCESS_ALL_DOWNLOADS = "android.permission.ACCESS_ALL_DOWNLOADS";
@@ -379,4 +383,6 @@ public class AndroidAppPermissions {
     public static final String PERMISSION_UPDATE_CONFIG = "android.permission.UPDATE_CONFIG";
     public static final String PERMISSION_UPDATE_LOCK_TASK_PACKAGES = "android.permission.UPDATE_LOCK_TASK_PACKAGES";
     public static final String PERMISSION_WRITE_BLOCKED_NUMBERS = "android.permission.WRITE_BLOCKED_NUMBERS";
+
+    public static final List<String> DANGEROUS_PERMISSIONS = Arrays.asList("com.google.android.gms.permission.CAR_VENDOR_EXTENSION","com.google.android.gms.permission.CAR_MILEAGE","com.google.android.gms.permission.CAR_FUEL","android.permission.WRITE_CONTACTS","android.permission.GET_ACCOUNTS","android.permission.READ_CONTACTS","android.permission.READ_CALL_LOG","android.permission.READ_PHONE_STATE","android.permission.CALL_PHONE","android.permission.WRITE_CALL_LOG","android.permission.USE_SIP","android.permission.PROCESS_OUTGOING_CALLS","com.android.voicemail.permission.ADD_VOICEMAIL","android.permission.READ_CALENDAR","android.permission.WRITE_CALENDAR","android.permission.CAMERA","android.permission.BODY_SENSORS","android.permission.ACCESS_FINE_LOCATION","com.google.android.gms.permission.CAR_SPEED","android.permission.ACCESS_COARSE_LOCATION","android.permission.READ_EXTERNAL_STORAGE","android.permission.WRITE_EXTERNAL_STORAGE","android.permission.RECORD_AUDIO","android.permission.READ_SMS","android.permission.RECEIVE_WAP_PUSH","android.permission.RECEIVE_MMS","android.permission.RECEIVE_SMS","android.permission.SEND_SMS","android.permission.READ_CELL_BROADCASTS");
 }
