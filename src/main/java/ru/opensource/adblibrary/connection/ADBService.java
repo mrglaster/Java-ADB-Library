@@ -51,7 +51,7 @@ public class ADBService {
     private boolean isValidAdbPath(String path){
         if (path.length() == 0) return false;
         try {
-            Process process = Runtime.getRuntime().exec(adbPath + " version");
+            Process process = Runtime.getRuntime().exec(path + " version");
             int exitCode = process.waitFor();
             return exitCode == 0;
         } catch (IOException | InterruptedException e) {

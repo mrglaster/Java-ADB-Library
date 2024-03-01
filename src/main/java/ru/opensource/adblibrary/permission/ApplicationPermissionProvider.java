@@ -2,6 +2,7 @@ package ru.opensource.adblibrary.permission;
 
 import ru.opensource.adblibrary.application.AndroidApplication;
 import ru.opensource.adblibrary.connection.ADBService;
+import ru.opensource.adblibrary.exceptions.ADBException;
 import ru.opensource.adblibrary.exceptions.ADBShellExecutionException;
 import ru.opensource.adblibrary.exceptions.OperationNotAllowedException;
 import ru.opensource.adblibrary.exceptions.UnknownPackageException;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 public class ApplicationPermissionProvider {
 
     /**Grants permission to the package by its String name with adb shell command only*/
-    public void grantPermissionShellOnly(ADBService adbService, String deviceId, String applicationPackage, String permission) throws ADBShellExecutionException, UnknownPackageException, UnknownPermissionException, OperationNotAllowedException {
+    public void grantPermissionShellOnly(ADBService adbService, String deviceId, String applicationPackage, String permission) throws ADBException {
         String command = adbService.getCommandBase(deviceId) + "pm grant " + applicationPackage + " " + permission;
         try {
             Process process = Runtime.getRuntime().exec(command);
@@ -35,12 +36,12 @@ public class ApplicationPermissionProvider {
     }
 
     /**Grants permission to the package with adb shell command only*/
-    public void grantPermissionShellOnly(ADBService adbService, String deviceId, AndroidApplication app, String permission) throws ADBShellExecutionException, UnknownPackageException, UnknownPermissionException, OperationNotAllowedException {
+    public void grantPermissionShellOnly(ADBService adbService, String deviceId, AndroidApplication app, String permission) throws ADBException{
         grantPermissionShellOnly(adbService, deviceId, app.getPackageName(), permission);
     }
 
     /**Revokes permission to the package by its String name with adb shell command only*/
-    public void revokePermissionShellOnly(ADBService adbService, String deviceId, String applicationPackage, String permission) throws ADBShellExecutionException, UnknownPackageException, UnknownPermissionException, OperationNotAllowedException{
+    public void revokePermissionShellOnly(ADBService adbService, String deviceId, String applicationPackage, String permission) throws ADBException{
         String command = adbService.getCommandBase(deviceId) + "pm revoke " + applicationPackage + " " + permission;
         System.out.println(command);
         try {
@@ -63,7 +64,7 @@ public class ApplicationPermissionProvider {
         }
     }
     /**Revokes permission from the package with adb shell command only*/
-    public void revokePermissionShellOnly(ADBService adbService, String deviceId, AndroidApplication app, String permission) throws ADBShellExecutionException, UnknownPackageException, UnknownPermissionException, OperationNotAllowedException{
+    public void revokePermissionShellOnly(ADBService adbService, String deviceId, AndroidApplication app, String permission) throws ADBException{
         revokePermissionShellOnly(adbService, deviceId, app.getPackageName(), permission);
     }
 }
