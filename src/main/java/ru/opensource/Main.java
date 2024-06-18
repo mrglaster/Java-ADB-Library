@@ -15,8 +15,6 @@ public class Main {
         ADBService service = new ADBService();
         ArrayList<String> result = service.getAvailableDevices();
         AndroidDevice device = new AndroidDevice(result.get(0), service, 5);
-        System.out.println(device.getApplications().get(0));
-
-
+        System.out.println(device.getInterfaceIpAddr("wlan0", "ipv6"));
     }
 }

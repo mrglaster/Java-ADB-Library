@@ -3,19 +3,20 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import ru.opensource.adblibrary.application.AndroidApplication;
-import ru.opensource.adblibrary.exceptions.ADBException;
+import ru.opensource.adblibrary.exceptions.*;
 import ru.opensource.adblibrary.permission.ApplicationPermission;
 import ru.opensource.adblibrary.calc.HashCalc;
 import ru.opensource.adblibrary.connection.ADBService;
-import ru.opensource.adblibrary.exceptions.ADBPermissionCollectingException;
-import ru.opensource.adblibrary.exceptions.ADBShellExecutionException;
-import ru.opensource.adblibrary.exceptions.AndroidDeviceNotAvailableException;
-import ru.opensource.adblibrary.exceptions.InvalidPackageNameException;
 import ru.opensource.adblibrary.permission.ApplicationPermissionProvider;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AndroidDevice extends AndroidDeviceInfo {
 
@@ -31,7 +32,11 @@ public class AndroidDevice extends AndroidDeviceInfo {
     private static final int COLLECT_REQUESTED_PERMISSIONS = 1;
     private static final int COLLECT_INSTALL_PERMISSIONS = 2;
     private static final int COLLECT_RUNTIME_PERMISSIONS = 3;
-    private final int restriction;
+    private int restriction = -1;
+    private final List<String> supportedIpVersions =  Arrays.asList(new String[]{"ipv4", "ipv6"});
+
+    @Getter
+    private final ArrayList<String> networkInterfaces = new ArrayList<>();
 
     public AndroidDevice(@NotNull String deviceId, ADBService adbService) throws ADBException, IOException, NoSuchAlgorithmException{
         super(deviceId, adbService);
@@ -43,6 +48,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         this.versionNumeric = Float.parseFloat(truncateAndroidVersion());
         collectApplications();
         collectApplicationProperties();
+        collectNetworkInterface();
     }
 
     public AndroidDevice(@NotNull String deviceId, ADBService adbService, int appsListRestriction) throws ADBException, IOException, NoSuchAlgorithmException {
@@ -55,6 +61,8 @@ public class AndroidDevice extends AndroidDeviceInfo {
         this.versionNumeric = Float.parseFloat(truncateAndroidVersion());
         collectApplications();
         collectApplicationProperties();
+        collectNetworkInterface();
+
     }
 
     private void collectApplications() throws ADBShellExecutionException {
@@ -139,7 +147,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
        return getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(super.getAdbService().getCommandBase(super.getDeviceId()) + ' ' + hashFunction + ' ' + applicationPath)).get(0).split(" ")[0];
     }
 
-    private void collectApplicationPermissions(AndroidApplication application) throws ADBPermissionCollectingException {
+    private void collectApplicationPermissions(AndroidApplication application) throws ADBException {
         String command = super.getAdbService().getCommandBase(this.getDeviceId()) + " dumpsys package " + application.getPackageName();
         try {
             ArrayList<String> collectedStrings = super.getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(command));
@@ -180,7 +188,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     }
 
-    public void uninstallApp(String packageName) throws InvalidPackageNameException, ADBException {
+    public void uninstallApp(String packageName) throws ADBException {
         if (!packageName.contains(".")){
             throw new InvalidPackageNameException("Invalid package name: " + packageName);
         }
@@ -198,5 +206,54 @@ public class AndroidDevice extends AndroidDeviceInfo {
         } catch (IOException e) {
             throw new ADBShellExecutionException("Unable to uninstall app " + packageName + " ! Check if the device is available!");
         }
+    }
+
+    private void collectNetworkInterface() throws ADBException {
+        String command = super.getAdbService().getCommandBase(super.getDeviceId()) + " ifconfig";
+        getAdbService().logInfo("Collecting network interfaces");
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            ArrayList<String> ifconfigRows = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
+            for (var row: ifconfigRows) {
+                if (row.contains("encap")){
+                    this.networkInterfaces.add(row.split(" ")[0]);
+                }
+            }
+        } catch (IOException e) {
+            throw new ADBShellExecutionException("Device not available!");
+        }
+    }
+
+    public String getInterfaceIpAddr(String interfaceName, String ipVersion) throws ADBException {
+
+        if (!this.networkInterfaces.contains(interfaceName)){
+            throw new NetworkInterfaceNotFoundException("Interface " + interfaceName + " not found!");
+        }
+        String command = super.getAdbService().getCommandBase(super.getDeviceId()) + " ip addr show " + interfaceName;
+        getAdbService().logInfo("Getting IP for interface " + interfaceName + " with " + command);
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            ArrayList<String> rows = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
+            for (var row : rows){
+                if(Objects.equals(ipVersion, supportedIpVersions.get(0)) && row.contains("inet")){
+                    String ipPattern = "inet\\s(\\d+\\.\\d+\\.\\d+\\.\\d+)/\\d+";
+                    Pattern pattern = Pattern.compile(ipPattern);
+                    Matcher matcher = pattern.matcher(row);
+                    if (matcher.find()) {
+                        return matcher.group(1);
+                    } 
+                } else if (Objects.equals(ipVersion, supportedIpVersions.get(1)) && row.contains("inet6")) {
+                    String ipPattern = "inet6\\s([\\da-fA-F:]+)/\\d+";
+                    Pattern pattern = Pattern.compile(ipPattern);
+                    Matcher matcher = pattern.matcher(row);
+                    if (matcher.find()) {
+                        return matcher.group(1);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new ADBShellExecutionException("Device not available!");
+        }
+        return "";
     }
 }
