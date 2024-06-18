@@ -59,23 +59,29 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     private void collectApplications() throws ADBShellExecutionException {
         String command = super.getAdbService().getCommandBase(super.getDeviceId()) + " pm list packages -f ";
+        final String fileFormat = ".apk";
         getAdbService().logInfo("Getting applications list with command: " + command);
         try {
             Process process = Runtime.getRuntime().exec(command);
             ArrayList<String> result = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
+            int appCounter = 0;
             for (var application : result){
                 String currentApp = application;
                 currentApp = currentApp.replace("package:/", "/");
-                String[] params = currentApp.split("=");
+
+                String[] params = currentApp.split(fileFormat + "=");
                 AndroidApplication app = new AndroidApplication();
-                app.setPath(params[0]);
+                app.setPath(params[0] + fileFormat);
                 app.setPackageName(params[1]);
                 this.applications.add(app);
+                appCounter++;
+                if (this.restriction > 0 && appCounter == restriction) break;
             }
         } catch (IOException e) {
             throw new ADBShellExecutionException("Unable to get the applications list! Check if the device is available!");
         }
     }
+
 
     private void collectApplicationProperties() throws IOException, NoSuchAlgorithmException, ADBException {
         int res = 0;
@@ -111,7 +117,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
             getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(command));
             sha256 = HashCalc.calculateSha256Hash(tempApkName);
             sha512= HashCalc.calculateSha512Hash(tempApkName);
-            if (sha1.length() == 0 ){
+            if (sha1.isEmpty()){
                 sha1 = HashCalc.calculateSha1Hash(tempApkName);
             }
         }
@@ -123,7 +129,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         if (firstDotIndex != -1) {
             int secondDotIndex = super.getAndroidVersion().indexOf('.', firstDotIndex + 1);
             if (secondDotIndex != -1) {
-                return super.getAndroidVersion().substring(0, secondDotIndex + 1);
+                return super.getAndroidVersion().substring(0, secondDotIndex);
             }
         }
         return super.getAndroidVersion();
@@ -178,7 +184,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
         if (!packageName.contains(".")){
             throw new InvalidPackageNameException("Invalid package name: " + packageName);
         }
-        String command = "adb uninstall " + packageName;
+        String command = super.getAdbService().getAdbPath() + " uninstall " + packageName;
         getAdbService().logInfo("Uninstalling App: " + packageName);
         try {
             Process process = Runtime.getRuntime().exec(command);

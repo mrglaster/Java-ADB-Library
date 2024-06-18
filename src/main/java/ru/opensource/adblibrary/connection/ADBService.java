@@ -7,15 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+@Getter
 public class ADBService {
 
-    @Getter
     private final String adbPath;
 
-    @Getter
     private final Logger adbServiceLogger = Logger.getLogger("ADBServiceLogger");
 
-    @Getter
     private final ProcessOutputHandler processOutputHandler;
 
     public ADBService() throws ADBNotFoundException {
@@ -49,7 +47,7 @@ public class ADBService {
     }
 
     private boolean isValidAdbPath(String path){
-        if (path.length() == 0) return false;
+        if (path.isEmpty()) return false;
         try {
             Process process = Runtime.getRuntime().exec(path + " version");
             int exitCode = process.waitFor();
@@ -67,13 +65,13 @@ public class ADBService {
             ArrayList<String> processOutput = processOutputHandler.getProcessOutput(process);
             ArrayList<String> result = new ArrayList<>();
             for (var i : processOutput){
-                if (!i.startsWith("*") && !i.startsWith("List") && !(i.replaceAll("\\s+","").length() == 0)){
+                if (!i.startsWith("*") && !i.startsWith("List") && !(i.replaceAll("\\s+", "").isEmpty())){
                     String processedResult = i;
                     processedResult = processedResult.replace("device", "").strip();
                     result.add(processedResult);
                 }
             }
-            if (result.size() == 0){
+            if (result.isEmpty()){
                 adbServiceLogger.warning("No available devices found!");
             }
             return result;
