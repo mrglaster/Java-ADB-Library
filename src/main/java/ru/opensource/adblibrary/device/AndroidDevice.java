@@ -9,6 +9,7 @@ import ru.opensource.adblibrary.calc.HashCalc;
 import ru.opensource.adblibrary.connection.ADBService;
 import ru.opensource.adblibrary.permission.ApplicationPermissionProvider;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -33,14 +34,14 @@ public class AndroidDevice extends AndroidDeviceInfo {
     private static final int COLLECT_INSTALL_PERMISSIONS = 2;
     private static final int COLLECT_RUNTIME_PERMISSIONS = 3;
     private int restriction = -1;
-    private final List<String> supportedIpVersions =  Arrays.asList(new String[]{"ipv4", "ipv6"});
+    private final List<String> supportedIpVersions = Arrays.asList(new String[]{"ipv4", "ipv6"});
 
     @Getter
     private final ArrayList<String> networkInterfaces = new ArrayList<>();
 
-    public AndroidDevice(@NotNull String deviceId, ADBService adbService) throws ADBException, IOException, NoSuchAlgorithmException{
+    public AndroidDevice(@NotNull String deviceId, ADBService adbService) throws ADBException, IOException, NoSuchAlgorithmException {
         super(deviceId, adbService);
-        if (!adbService.getAvailableDevices().contains(deviceId)){
+        if (!adbService.getAvailableDevices().contains(deviceId)) {
             throw new AndroidDeviceNotAvailableException("Android device " + deviceId + "is not available!");
         }
         this.restriction = -1;
@@ -53,7 +54,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     public AndroidDevice(@NotNull String deviceId, ADBService adbService, int appsListRestriction) throws ADBException, IOException, NoSuchAlgorithmException {
         super(deviceId, adbService);
-        if (!adbService.getAvailableDevices().contains(deviceId)){
+        if (!adbService.getAvailableDevices().contains(deviceId)) {
             throw new AndroidDeviceNotAvailableException("Android device " + deviceId + "is not available!");
         }
         this.restriction = appsListRestriction;
@@ -73,7 +74,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
             Process process = Runtime.getRuntime().exec(command);
             ArrayList<String> result = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
             int appCounter = 0;
-            for (var application : result){
+            for (var application : result) {
                 String currentApp = application;
                 currentApp = currentApp.replace("package:/", "/");
 
@@ -93,7 +94,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     private void collectApplicationProperties() throws IOException, NoSuchAlgorithmException, ADBException {
         int res = 0;
-        for (var application : this.applications){
+        for (var application : this.applications) {
             collectApplicationPermissions(application);
             String[] hashes = collectApplicationHashes(application.getPath());
             application.setSha1(hashes[0]);
@@ -111,21 +112,21 @@ public class AndroidDevice extends AndroidDeviceInfo {
         String sha256 = "";
         String sha512 = "";
         String tempApkName = "temp.apk";
-        if (versionNumeric >= 8.0){
-           sha1 = collectApplicationHashAuto("sha1sum", applicationPath);
-           sha256 = collectApplicationHashAuto("sha256sum", applicationPath);
-           sha512 = collectApplicationHashAuto("sha512sum", applicationPath);
+        if (versionNumeric >= 8.0) {
+            sha1 = collectApplicationHashAuto("sha1sum", applicationPath);
+            sha256 = collectApplicationHashAuto("sha256sum", applicationPath);
+            sha512 = collectApplicationHashAuto("sha512sum", applicationPath);
         }
-        if (versionNumeric >= 6.0){
+        if (versionNumeric >= 6.0) {
             sha1 = collectApplicationHashAuto("sha1sum", applicationPath);
         }
-        if (versionNumeric <= 6.0){
-            String command = super.getAdbService().getCommandBaseNoShell(super.getDeviceId()) +   "pull " + applicationPath + ' ' + tempApkName;
+        if (versionNumeric <= 6.0) {
+            String command = super.getAdbService().getCommandBaseNoShell(super.getDeviceId()) + "pull " + applicationPath + ' ' + tempApkName;
             getAdbService().logInfo("Grabbing apk file using command: " + command);
             getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(command));
             sha256 = HashCalc.calculateSha256Hash(tempApkName);
-            sha512= HashCalc.calculateSha512Hash(tempApkName);
-            if (sha1.isEmpty()){
+            sha512 = HashCalc.calculateSha512Hash(tempApkName);
+            if (sha1.isEmpty()) {
                 sha1 = HashCalc.calculateSha1Hash(tempApkName);
             }
         }
@@ -144,7 +145,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
     }
 
     private String collectApplicationHashAuto(String hashFunction, String applicationPath) throws IOException {
-       return getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(super.getAdbService().getCommandBase(super.getDeviceId()) + ' ' + hashFunction + ' ' + applicationPath)).get(0).split(" ")[0];
+        return getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(super.getAdbService().getCommandBase(super.getDeviceId()) + ' ' + hashFunction + ' ' + applicationPath)).get(0).split(" ")[0];
     }
 
     private void collectApplicationPermissions(AndroidApplication application) throws ADBException {
@@ -152,24 +153,24 @@ public class AndroidDevice extends AndroidDeviceInfo {
         try {
             ArrayList<String> collectedStrings = super.getAdbService().getProcessOutputHandler().getProcessOutput(Runtime.getRuntime().exec(command));
             int currentState = 0;
-            for (var row : collectedStrings){
-                if (row.contains("requested permissions")){
+            for (var row : collectedStrings) {
+                if (row.contains("requested permissions")) {
                     currentState = COLLECT_REQUESTED_PERMISSIONS;
                     continue;
                 }
-                if (row.contains("install permissions")){
+                if (row.contains("install permissions")) {
                     currentState = COLLECT_INSTALL_PERMISSIONS;
                     continue;
                 }
-                if (row.contains("runtime permissions")){
+                if (row.contains("runtime permissions")) {
                     currentState = COLLECT_RUNTIME_PERMISSIONS;
                 }
-                if (currentState != 0 && row.contains("android.permission")){
+                if (currentState != 0 && row.contains("android.permission")) {
                     String currentRow = row.strip();
                     ApplicationPermission currentPermission = new ApplicationPermission();
                     currentPermission.setGranted(currentRow.contains("true"));
                     currentPermission.setPermissionName(currentRow.split(":")[0]);
-                    if (currentPermission.isDangerous()){
+                    if (currentPermission.isDangerous()) {
                         application.addDangerousPermission(currentPermission);
                     }
                     switch (currentState) {
@@ -189,7 +190,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
     }
 
     public void uninstallApp(String packageName) throws ADBException {
-        if (!packageName.contains(".")){
+        if (!packageName.contains(".")) {
             throw new InvalidPackageNameException("Invalid package name: " + packageName);
         }
         String command = super.getAdbService().getAdbPath() + " uninstall " + packageName;
@@ -197,8 +198,8 @@ public class AndroidDevice extends AndroidDeviceInfo {
         try {
             Process process = Runtime.getRuntime().exec(command);
             super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
-            for (int i = 0; i < applications.size() ; i++) {
-                if (applications.get(i).getPackageName().equals(packageName)){
+            for (int i = 0; i < applications.size(); i++) {
+                if (applications.get(i).getPackageName().equals(packageName)) {
                     applications.remove(i);
                     break;
                 }
@@ -214,8 +215,8 @@ public class AndroidDevice extends AndroidDeviceInfo {
         try {
             Process process = Runtime.getRuntime().exec(command);
             ArrayList<String> ifconfigRows = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
-            for (var row: ifconfigRows) {
-                if (row.contains("encap")){
+            for (var row : ifconfigRows) {
+                if (row.contains("encap")) {
                     this.networkInterfaces.add(row.split(" ")[0]);
                 }
             }
@@ -226,7 +227,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
 
     public String getInterfaceIpAddr(String interfaceName, String ipVersion) throws ADBException {
 
-        if (!this.networkInterfaces.contains(interfaceName)){
+        if (!this.networkInterfaces.contains(interfaceName)) {
             throw new NetworkInterfaceNotFoundException("Interface " + interfaceName + " not found!");
         }
         String command = super.getAdbService().getCommandBase(super.getDeviceId()) + " ip addr show " + interfaceName;
@@ -234,14 +235,14 @@ public class AndroidDevice extends AndroidDeviceInfo {
         try {
             Process process = Runtime.getRuntime().exec(command);
             ArrayList<String> rows = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
-            for (var row : rows){
-                if(Objects.equals(ipVersion, supportedIpVersions.get(0)) && row.contains("inet")){
+            for (var row : rows) {
+                if (Objects.equals(ipVersion, supportedIpVersions.get(0)) && row.contains("inet")) {
                     String ipPattern = "inet\\s(\\d+\\.\\d+\\.\\d+\\.\\d+)/\\d+";
                     Pattern pattern = Pattern.compile(ipPattern);
                     Matcher matcher = pattern.matcher(row);
                     if (matcher.find()) {
                         return matcher.group(1);
-                    } 
+                    }
                 } else if (Objects.equals(ipVersion, supportedIpVersions.get(1)) && row.contains("inet6")) {
                     String ipPattern = "inet6\\s([\\da-fA-F:]+)/\\d+";
                     Pattern pattern = Pattern.compile(ipPattern);
@@ -255,5 +256,25 @@ public class AndroidDevice extends AndroidDeviceInfo {
             throw new ADBShellExecutionException("Device not available!");
         }
         return "";
+    }
+
+    public boolean installAppFromApk(String apkPath) throws ADBException {
+        if (apkPath.isEmpty() || !new File(apkPath).exists()) {
+            throw new ADBIncorrectPathException("APK file " + apkPath + " does not exist!");
+        }
+        String command = super.getAdbService().getCommandBaseNoShell(super.getDeviceId()) + " install " + apkPath;
+        getAdbService().logInfo("Installing apk " + apkPath + " with command " + command);
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            ArrayList<String> rows = super.getAdbService().getProcessOutputHandler().getProcessOutput(process);
+            for (var i : rows){
+                if (i.contains("Success")){
+                    return true;
+                }
+            }
+            return false;
+        } catch (IOException e) {
+            throw new ADBShellExecutionException("Device not available!");
+        }
     }
 }
