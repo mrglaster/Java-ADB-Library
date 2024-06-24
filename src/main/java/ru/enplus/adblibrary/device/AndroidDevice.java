@@ -37,11 +37,12 @@ public class AndroidDevice extends AndroidDeviceInfo {
      *
      * @param deviceId the ID of the Android device
      * @param adbService the ADB service used to interact with the Android device
+     * @param collectProperties use True if you alse want to collect such applications properties as hashes, etc (requires time)
      * @throws ADBException if there is an error during ADB operations
      * @throws IOException if there is an IO error
      * @throws NoSuchAlgorithmException if there is an error with hashing algorithms
      */
-    public AndroidDevice(@NotNull String deviceId, ADBService adbService) throws ADBException, IOException, NoSuchAlgorithmException {
+    public AndroidDevice(@NotNull String deviceId, ADBService adbService, boolean collectProperties) throws ADBException, IOException, NoSuchAlgorithmException {
         super(deviceId, adbService);
         if (!adbService.getAvailableDevices().contains(deviceId)) {
             throw new AndroidDeviceNotAvailableException("Android device " + deviceId + " is not available!");
@@ -50,7 +51,9 @@ public class AndroidDevice extends AndroidDeviceInfo {
         this.applications = new ArrayList<>();
         this.versionNumeric = Float.parseFloat(truncateAndroidVersion(getAndroidVersion()));
         this.applications = applicationDataProvider.getApplicationsList(-1);
-        collectApplicationProperties();
+        if (collectProperties){
+            collectApplicationProperties();
+        }
     }
 
     /**
@@ -59,11 +62,12 @@ public class AndroidDevice extends AndroidDeviceInfo {
      * @param deviceId the ID of the Android device
      * @param adbService the ADB service used to interact with the Android device
      * @param appsListRestriction the maximum number of applications to retrieve
+     * @param collectProperties use True if you alse want to collect such applications properties as hashes, etc
      * @throws ADBException if there is an error during ADB operations
      * @throws IOException if there is an IO error
      * @throws NoSuchAlgorithmException if there is an error with hashing algorithms
      */
-    public AndroidDevice(@NotNull String deviceId, ADBService adbService, int appsListRestriction) throws ADBException, IOException, NoSuchAlgorithmException {
+    public AndroidDevice(@NotNull String deviceId, ADBService adbService, int appsListRestriction, boolean collectProperties) throws ADBException, IOException, NoSuchAlgorithmException {
         super(deviceId, adbService);
         if (!adbService.getAvailableDevices().contains(deviceId)) {
             throw new AndroidDeviceNotAvailableException("Android device " + deviceId + " is not available!");
@@ -72,7 +76,9 @@ public class AndroidDevice extends AndroidDeviceInfo {
         this.applications = new ArrayList<>();
         this.versionNumeric = Float.parseFloat(truncateAndroidVersion(getAndroidVersion()));
         this.applications = applicationDataProvider.getApplicationsList(appsListRestriction);
-        collectApplicationProperties();
+        if (collectProperties) {
+            collectApplicationProperties();
+        }
     }
 
     /**
@@ -95,7 +101,7 @@ public class AndroidDevice extends AndroidDeviceInfo {
      * @throws NoSuchAlgorithmException if there is an error with hashing algorithms
      * @throws ADBException if there is an error during ADB operations
      */
-    private void collectApplicationProperties() throws IOException, NoSuchAlgorithmException, ADBException {
+    public void collectApplicationProperties() throws IOException, NoSuchAlgorithmException, ADBException {
         for (var application : this.applications) {
             applicationDataProvider.fillApplicationPermissions(application);
             applicationDataProvider.fillApplicationHashes(application, versionNumeric);
